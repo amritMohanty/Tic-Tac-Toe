@@ -62,16 +62,19 @@ function Board({ xIsNext, squares, onPlay }) {
 export default function Game() {
   const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const currentSquares = history[history.length - 1];
+  const [currentMove, setCurrentMove] = useState(0);
+  const currentSquares = history[currentMove];
 
   function handlePlay(nextSquares) {
-    setHistory([...history, nextSquares]);
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
     setXIsNext(!xIsNext);
   }
 
   function jumpTo(nextMove) {
-    // const backHistory = history.slice();
-    // setHistory(backHistory[nextMove - 1]);
+    setCurrentMove(nextMove);
+    setXIsNext(xIsNext % 2 === 0);
   }
 
   const moves = history.map((squares, move) => {
@@ -82,12 +85,16 @@ export default function Game() {
     } else {
       description = "start the game";
     }
-
-    return (
-      <li>
-        <button onClick={() => jumpTo(move)}>{description}</button>
-      </li>
-    );
+    if (move != currentMove) {
+      return (
+        // ...conditional rendering for showing the last move as a text
+        <li key={move}>
+          <button onClick={() => jumpTo(move)}>{description}</button>
+        </li>
+      );
+    } else {
+      return <li key={move}>You are at move #{currentMove}</li>;
+    }
   });
   return (
     <div className="game">
